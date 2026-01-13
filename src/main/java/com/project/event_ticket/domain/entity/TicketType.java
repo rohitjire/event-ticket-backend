@@ -1,4 +1,4 @@
-package com.project.event_ticket.domain;
+package com.project.event_ticket.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -30,6 +30,9 @@ public class TicketType {
 
     @Column(name = "price", nullable = false)
     private Double price;
+
+    @Column(name = "description")
+    private Double description;
 
     @Column(name = "total_available")
     private Integer totalAvailable;
