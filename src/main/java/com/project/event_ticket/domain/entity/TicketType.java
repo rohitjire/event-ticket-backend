@@ -32,7 +32,7 @@ public class TicketType {
     private Double price;
 
     @Column(name = "description")
-    private Double description;
+    private String description;
 
     @Column(name = "total_available")
     private Integer totalAvailable;
