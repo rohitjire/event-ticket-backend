@@ -8,6 +8,8 @@ import com.project.event_ticket.exceptions.UserNotFoundException;
 import com.project.event_ticket.repository.EventRepository;
 import com.project.event_ticket.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -45,6 +47,10 @@ public class EventService {
         eventToCreate.setOrganizer(organizer);
         eventToCreate.setTicketTypes(ticketTypesToCreate);
         return eventRepository.save(eventToCreate);
+    }
+
+    public Page<Event> listEventsForOrganizer(UUID organizerId, Pageable pageable) {
+        return eventRepository.findByOrganizerId(organizerId, pageable);
     }
 
 }
