@@ -8,6 +8,8 @@ import com.project.event_ticket.domain.requests.CreateTicketTypeRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
+import java.util.Optional;
+
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface EventMapper {
 
@@ -20,4 +22,9 @@ public interface EventMapper {
     ListEventTicketTypeResponseDto toDto(TicketType ticketType);
 
     ListEventResponseDto toListEventResponseDto(Event event);
+
+    GetEventDetailsTicketTypesResponseDto toGetEventDetailsTicketTypesResponseDto(TicketType ticketType);
+
+    GetEventDetailsResponseDto toGetEventDetailsResponseDto(Event event);
+
 }
