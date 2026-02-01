@@ -1,16 +1,13 @@
 package com.project.event_ticket.controllers;
 
-import com.project.event_ticket.domain.dtos.CreateEventRequestDto;
-import com.project.event_ticket.domain.dtos.CreateEventResponseDto;
-import com.project.event_ticket.domain.dtos.GetEventDetailsResponseDto;
-import com.project.event_ticket.domain.dtos.ListEventResponseDto;
+import com.project.event_ticket.domain.dtos.*;
 import com.project.event_ticket.domain.entity.Event;
 import com.project.event_ticket.domain.requests.CreateEventRequest;
+import com.project.event_ticket.domain.requests.UpdateEventRequest;
 import com.project.event_ticket.mappers.EventMapper;
 import com.project.event_ticket.services.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -60,6 +57,18 @@ public class EventController {
                 .map(eventMapper::toGetEventDetailsResponseDto)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping(path = "/{eventId}")
+    public ResponseEntity<UpdateEventResponseDto> updateEvent(
+            @AuthenticationPrincipal Jwt jwt,
+            @PathVariable UUID eventId,
+            @Valid @RequestBody UpdateEventRequestDto updateEventRequestDto) {
+        UpdateEventRequest updateEventRequest = eventMapper.fromDto(updateEventRequestDto);
+        UUID userId = parseUserId(jwt);
+        Event updatedEvent = eventService.updateEventForOrganizer(userId, eventId, updateEventRequest);
+        UpdateEventResponseDto updateEventResponseDto = eventMapper.toUpdateEventResponseDto(updatedEvent);
+        return ResponseEntity.ok(updateEventResponseDto);
     }
 
     private static UUID parseUserId(Jwt jwt) {
