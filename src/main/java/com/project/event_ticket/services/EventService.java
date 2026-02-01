@@ -3,6 +3,7 @@ package com.project.event_ticket.services;
 import com.project.event_ticket.domain.entity.Event;
 import com.project.event_ticket.domain.entity.TicketType;
 import com.project.event_ticket.domain.entity.User;
+import com.project.event_ticket.domain.enums.EventStatus;
 import com.project.event_ticket.domain.requests.CreateEventRequest;
 import com.project.event_ticket.domain.requests.UpdateEventRequest;
 import com.project.event_ticket.domain.requests.UpdateTicketTypeRequest;
@@ -129,5 +130,17 @@ public class EventService {
     @Transactional
     public void deleteEventForOrganizer(UUID organizerId, UUID id) {
         getEventForOrganizer(organizerId, id).ifPresent(eventRepository::delete);
+    }
+
+    public Page<Event> listPublishedEvents(Pageable pageable) {
+        return eventRepository.findByStatus(EventStatus.PUBLISHED, pageable);
+    }
+
+    public Page<Event> searchPublishedEvents(String query, Pageable pageable) {
+        return eventRepository.searchEvents(query, pageable);
+    }
+
+    public Optional<Event> getPublishedEvent(UUID id) {
+        return eventRepository.findByIdAndStatus(id, EventStatusEnum.PUBLISHED);
     }
 }

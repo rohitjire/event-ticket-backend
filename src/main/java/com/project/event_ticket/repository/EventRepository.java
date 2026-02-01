@@ -1,9 +1,12 @@
 package com.project.event_ticket.repository;
 
 import com.project.event_ticket.domain.entity.Event;
+import com.project.event_ticket.domain.enums.EventStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -14,5 +17,18 @@ public interface EventRepository extends JpaRepository<Event, UUID> {
 
     Optional<Event> findByIdAndOrganizerId(UUID id, UUID organizerId);
 
+    Page<Event> findByStatus(EventStatus status, Pageable pageable);
 
+    @Query(value = "SELECT * FROM events WHERE " +
+            "status = 'PUBLISHED' AND " +
+            "to_tsvector('english', COALESCE(name, '') || ' ' || COALESCE(venue, '')) " +
+            "@@ plainto_tsquery('english', :searchTerm)",
+            countQuery = "SELECT count(*) FROM events WHERE " +
+                    "status = 'PUBLISHED' AND " +
+                    "to_tsvector('english', COALESCE(name, '') || ' ' || COALESCE(venue, '')) " +
+                    "@@ plainto_tsquery('english', :searchTerm)",
+            nativeQuery = true)
+    Page<Event> searchEvents(@Param("searchTerm") String searchTerm, Pageable pageable);
+
+    Optional<Event> findByIdAndStatus(UUID id, EventStatus status);
 }
