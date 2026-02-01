@@ -125,4 +125,9 @@ public class EventService {
         }
         return eventRepository.save(existingEvent);
     }
+
+    @Transactional
+    public void deleteEventForOrganizer(UUID organizerId, UUID id) {
+        getEventForOrganizer(organizerId, id).ifPresent(eventRepository::delete);
+    }
 }
