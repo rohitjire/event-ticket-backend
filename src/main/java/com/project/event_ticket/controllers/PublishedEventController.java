@@ -22,12 +22,6 @@ public class PublishedEventController {
     private final EventMapper eventMapper;
 
     @GetMapping
-    public ResponseEntity<Page<ListPublishedEventResponseDto>> listPublishedEvents(Pageable pageable) {
-        return ResponseEntity.ok(eventService.listPublishedEvents(pageable)
-                .map(eventMapper::toListPublishedEventResponseDto));
-    }
-
-    @GetMapping
     public ResponseEntity<Page<ListPublishedEventResponseDto>> listPublishedEvents(
             @RequestParam(required = false) String q, Pageable pageable) {
         Page<Event> events;
@@ -42,9 +36,7 @@ public class PublishedEventController {
     }
 
     @GetMapping(path = "/{eventId}")
-    public ResponseEntity<GetPublishedEventDetailsResponseDto> getPublishedEventDetails(
-            @PathVariable UUID eventId
-    ) {
+    public ResponseEntity<GetPublishedEventDetailsResponseDto> getPublishedEventDetails(@PathVariable UUID eventId) {
         return eventService.getPublishedEvent(eventId)
                 .map(eventMapper::toGetPublishedEventDetailsResponseDto)
                 .map(ResponseEntity::ok)

@@ -1,10 +1,7 @@
 package com.project.event_ticket.controllers;
 
 import com.project.event_ticket.domain.dtos.ErrorDto;
-import com.project.event_ticket.exceptions.EventNotFoundException;
-import com.project.event_ticket.exceptions.EventUpdateException;
-import com.project.event_ticket.exceptions.TicketTypeNotFoundException;
-import com.project.event_ticket.exceptions.UserNotFoundException;
+import com.project.event_ticket.exceptions.*;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -90,5 +87,29 @@ public class GlobalExceptionHandler {
         log.error("An error occurred: {}", ex.getMessage(), ex);
         ErrorDto errorDto = new ErrorDto("An unexpected error occurred. Please try again later.");
         return new ResponseEntity<>(errorDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(QrCodeGenerationException.class)
+    public ResponseEntity<ErrorDto> handleQrCodeGenerationException(QrCodeGenerationException ex) {
+        log.error("Caught QrCodeGenerationException", ex);
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setError("Unable to generate QR Code");
+        return new ResponseEntity<>(errorDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(QrCodeNotFoundException.class)
+    public ResponseEntity<ErrorDto> handleQrCodeNotFoundException(QrCodeNotFoundException ex) {
+        log.error("Caught QrCodeGenerationException", ex);
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setError("Qr Code not found");
+        return new ResponseEntity<>(errorDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(TicketsSoldOutException.class)
+    public ResponseEntity<ErrorDto> handleTicketSoldOutException(TicketsSoldOutException ex) {
+        log.error("Caught QrCodeGenerationException", ex);
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setError("Tickets are sold out for this ticket type");
+        return new ResponseEntity<>(errorDto, HttpStatus.BAD_REQUEST);
     }
 }

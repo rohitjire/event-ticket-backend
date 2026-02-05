@@ -141,6 +141,6 @@ public class EventService {
     }
 
     public Optional<Event> getPublishedEvent(UUID id) {
-        return eventRepository.findByIdAndStatus(id, EventStatusEnum.PUBLISHED);
+        return eventRepository.findByIdAndStatus(id, EventStatus.PUBLISHED);
     }
 }
