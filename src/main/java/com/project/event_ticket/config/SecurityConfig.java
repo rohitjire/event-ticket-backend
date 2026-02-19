@@ -24,6 +24,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/published-events/**").permitAll()
                         .requestMatchers("/api/v1/events").hasRole("ORGANIZER")
+                        .requestMatchers("/api/v1/ticket-validations").hasRole("STAFF")
                         .anyRequest().authenticated()
                 )
                 .csrf(AbstractHttpConfigurer::disable)
