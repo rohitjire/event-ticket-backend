@@ -111,15 +111,13 @@ const oidcConfig = {
     "http://localhost:9090/realms/event-ticket-platform",
   client_id: "event-ticket-platform-app",
   redirect_uri: `${window.location.origin}/callback`,
+  post_logout_redirect_uri: window.location.origin,
   response_type: "code",
   scope: "openid profile email",
   userStore: new WebStorageStateStore({ store: window.localStorage }),
-  // run after successful signin to remove auth params and jump to stored path
   onSigninCallback: () => {
-    const redirectPath = localStorage.getItem("redirectPath") || "/";
-    localStorage.removeItem("redirectPath");
-    // replace the URL and avoid leaving auth params in the URL
-    window.history.replaceState({}, document.title, redirectPath);
+    // Remove auth params from URL after successful token exchange
+    window.history.replaceState({}, document.title, window.location.pathname);
   },
 };
 
