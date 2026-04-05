@@ -1,6 +1,5 @@
 HELP.md
 target/
-.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -31,3 +30,18 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Frontend ###
+src/main/frontend/node_modules/
+src/main/frontend/dist/
+src/main/frontend/.env.local
+src/main/frontend/.env.*.local
+
+### Generated static resources (copied from frontend build during Maven build) ###
+src/main/resources/static/
+
+### Maven wrapper ###
+.mvn/wrapper/maven-wrapper.jar
+
+### Environment ###
+.env
