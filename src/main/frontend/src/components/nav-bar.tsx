@@ -8,30 +8,48 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { LogOut } from "lucide-react";
+import { Home, LogOut, QrCode } from "lucide-react";
 import { useRoles } from "@/hooks/use-roles";
 import { Link } from "react-router";
 
 const NavBar: React.FC = () => {
   const { user, signoutRedirect } = useAuth();
-  const { isOrganizer } = useRoles();
+  const { isOrganizer, isStaff } = useRoles();
 
   return (
-    <div className="bg-gray-950 border-b border-gray-800 text-white">
-      <div className="container mx-auto p-4">
-        <div className="flex justify-between items-center">
-          <div className="flex gap-10 md:gap-20 items-center">
-            <h1 className="text-xl font-bold">Event Ticket Platform</h1>
-            <div className="text-gray-300 flex gap-8">
-              {isOrganizer && <Link to="/dashboard/events">Events</Link>}
-              <Link to="/dashboard/tickets">Tickets</Link>
-            </div>
+    <div className="bg-gray-950/80 backdrop-blur-md border-b border-gray-800 text-white sticky top-0 z-50">
+      <div className="container mx-auto px-4">
+        <div className="flex justify-between items-center h-14">
+          <div className="flex gap-8 items-center">
+            <Link to="/" className="text-lg font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+              EventTix
+            </Link>
+            <nav className="flex items-center gap-6 text-sm">
+              <Link to="/" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1.5">
+                <Home className="h-4 w-4" />
+                Home
+              </Link>
+              {isOrganizer && (
+                <Link to="/dashboard/events" className="text-gray-400 hover:text-white transition-colors">
+                  Events
+                </Link>
+              )}
+              <Link to="/dashboard/tickets" className="text-gray-400 hover:text-white transition-colors">
+                Tickets
+              </Link>
+              {isStaff && (
+                <Link to="/dashboard/validate-qr" className="text-gray-400 hover:text-white transition-colors flex items-center gap-1.5">
+                  <QrCode className="h-4 w-4" />
+                  Validate
+                </Link>
+              )}
+            </nav>
           </div>
 
           <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-gray-700">
+            <DropdownMenuTrigger className="cursor-pointer">
+              <Avatar className="h-8 w-8 border border-gray-700 hover:border-purple-500 transition-colors">
+                <AvatarFallback className="bg-gray-800 text-sm">
                   {user?.profile?.preferred_username?.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
@@ -44,14 +62,14 @@ const NavBar: React.FC = () => {
                 <p className="text-sm font-medium">
                   {user?.profile?.preferred_username}
                 </p>
-                <p className="text-sm text-gray-400">{user?.profile?.email}</p>
+                <p className="text-xs text-gray-400">{user?.profile?.email}</p>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator />
+              <DropdownMenuSeparator className="bg-gray-700" />
               <DropdownMenuItem
-                className="hover:bg-gray-800"
+                className="hover:bg-gray-800 cursor-pointer"
                 onClick={() => signoutRedirect()}
               >
-                <LogOut />
+                <LogOut className="h-4 w-4" />
                 <span>Log Out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>

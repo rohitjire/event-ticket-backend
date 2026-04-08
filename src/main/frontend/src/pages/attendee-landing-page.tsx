@@ -2,7 +2,14 @@ import { useAuth } from "react-oidc-context";
 import { Button } from "../components/ui/button";
 import { useNavigate } from "react-router";
 import { Input } from "@/components/ui/input";
-import { AlertCircle, KeyRound, Search, Copy, Check } from "lucide-react";
+import {
+  AlertCircle,
+  CalendarSearch,
+  KeyRound,
+  Search,
+  Copy,
+  Check,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { PublishedEventSummary, SpringBootPagination } from "@/domain/domain";
 import { listPublishedEvents, searchPublishedEvents } from "@/lib/api";
@@ -38,7 +45,11 @@ const CopyButton: React.FC<{ text: string }> = ({ text }) => {
       className="text-gray-400 hover:text-white transition-colors cursor-pointer"
       title="Copy"
     >
-      {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
+      {copied ? (
+        <Check className="h-3.5 w-3.5 text-green-400" />
+      ) : (
+        <Copy className="h-3.5 w-3.5" />
+      )}
     </button>
   );
 };
@@ -85,7 +96,6 @@ const AttendeeLandingPage: React.FC = () => {
     }
 
     try {
-      // `query` is guaranteed to be a string here because of the early return
       setPublishedEvents(await searchPublishedEvents(query, page));
     } catch (err) {
       if (err instanceof Error) {
@@ -98,104 +108,146 @@ const AttendeeLandingPage: React.FC = () => {
     }
   };
 
-  if (error) {
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-black text-white">
-        <Alert variant="destructive" className="bg-gray-900 border-red-700">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent"></div>
       </div>
     );
   }
 
-  if (isLoading) {
-    return <p>Loading...</p>;
-  }
-
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="bg-gray-950 min-h-screen text-white">
       {/* Nav */}
-      <div className="flex justify-end p-4 container mx-auto">
-        {isAuthenticated ? (
-          <div className="flex gap-4">
+      <nav className="sticky top-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-gray-800">
+        <div className="container mx-auto px-4 flex justify-between items-center h-14">
+          <span className="text-lg font-bold bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">
+            EventTix
+          </span>
+          {isAuthenticated ? (
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/dashboard")}
+                className="cursor-pointer text-gray-300 hover:text-white"
+              >
+                Dashboard
+              </Button>
+              <Button
+                variant="ghost"
+                className="cursor-pointer text-gray-300 hover:text-white"
+                onClick={() => signoutRedirect()}
+              >
+                Log out
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-3">
+              <Button
+                variant="ghost"
+                className="cursor-pointer text-gray-300 hover:text-white"
+                onClick={() =>
+                  signinRedirect({
+                    extraQueryParams: { kc_action: "REGISTER" },
+                  })
+                }
+              >
+                Register
+              </Button>
+              <Button
+                className="cursor-pointer bg-purple-600 hover:bg-purple-700"
+                onClick={() => signinRedirect()}
+              >
+                Log in
+              </Button>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-gray-950 to-indigo-900/20"></div>
+        <div className="relative container mx-auto px-4 py-16 md:py-24">
+          <h1 className="text-3xl md:text-5xl font-bold mb-3 max-w-2xl">
+            Find Tickets to Your Next Event
+          </h1>
+          <p className="text-gray-400 text-lg mb-8 max-w-lg">
+            Browse events, purchase tickets, and get instant QR codes for entry.
+          </p>
+          <div className="flex gap-2 max-w-lg">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Input
+                className="bg-gray-900/80 border-gray-700 text-white pl-10 placeholder:text-gray-500"
+                placeholder="Search events..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && queryPublishedEvents()}
+              />
+            </div>
             <Button
-              onClick={() => navigate("/dashboard")}
-              className="cursor-pointer"
+              onClick={queryPublishedEvents}
+              className="bg-purple-600 hover:bg-purple-700 cursor-pointer"
             >
-              Dashboard
-            </Button>
-            <Button
-              className="cursor-pointer"
-              onClick={() => signoutRedirect()}
-            >
-              Log out
+              Search
             </Button>
           </div>
+        </div>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="container mx-auto px-4 mb-6">
+          <Alert variant="destructive" className="bg-gray-900 border-red-700">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* Events Section */}
+      <div className="container mx-auto px-4 pb-16">
+        <h2 className="text-xl font-semibold mb-6 text-gray-200">
+          Upcoming Events
+        </h2>
+
+        {publishedEvents?.content && publishedEvents.content.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {publishedEvents.content.map((publishedEvent) => (
+              <PublishedEventCard
+                publishedEvent={publishedEvent}
+                key={publishedEvent.id}
+              />
+            ))}
+          </div>
         ) : (
-          <div className="flex gap-4">
-            <Button
-              variant="outline"
-              className="cursor-pointer"
-              onClick={() =>
-                signinRedirect({
-                  extraQueryParams: { kc_action: "REGISTER" },
-                })
-              }
-            >
-              Register
-            </Button>
-            <Button className="cursor-pointer" onClick={() => signinRedirect()}>
-              Log in
-            </Button>
+          !error && (
+            <div className="text-center py-20">
+              <CalendarSearch className="h-12 w-12 text-gray-600 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg">No events found</p>
+              <p className="text-gray-600 text-sm mt-1">
+                Check back later for upcoming events
+              </p>
+            </div>
+          )
+        )}
+
+        {publishedEvents && (
+          <div className="w-full flex justify-center pt-8">
+            <SimplePagination
+              pagination={publishedEvents}
+              onPageChange={setPage}
+            />
           </div>
         )}
       </div>
-      {/* Hero */}
-      <div className="container mx-auto px-4 mb-8">
-        <div className="bg-[url(/organizers-landing-hero.png)] bg-cover min-h-[200px] rounded-lg bg-bottom md:min-h-[250px]">
-          <div className="bg-black/45 min-h-[200px] md:min-h-[250px] p-15 md:p-20">
-            <h1 className="text-2xl font-bold mb-4">
-              Find Tickets to Your Next Event
-            </h1>
-            <div className="flex gap-2 max-w-lg">
-              <Input
-                className="bg-white text-black"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-              />
-              <Button onClick={queryPublishedEvents}>
-                <Search />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Published Event Cards */}
-      <div className="grid grid-cols-2 gap-4 px-4 md:grid-cols-4">
-        {publishedEvents?.content?.map((publishedEvent) => (
-          <PublishedEventCard
-            publishedEvent={publishedEvent}
-            key={publishedEvent.id}
-          />
-        ))}
-      </div>
-
-      {publishedEvents && (
-        <div className="w-full flex justify-center py-8">
-          <SimplePagination
-            pagination={publishedEvents}
-            onPageChange={setPage}
-          />{" "}
-        </div>
-      )}
 
       {/* Test Credentials Dialog */}
       <Dialog>
         <DialogTrigger asChild>
-          <button className="fixed bottom-6 right-6 bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-colors cursor-pointer">
+          <button className="fixed bottom-6 right-6 bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-full shadow-lg flex items-center gap-2 transition-colors cursor-pointer z-50">
             <KeyRound className="h-5 w-5" />
             <span className="text-sm font-medium">Test Credentials</span>
           </button>

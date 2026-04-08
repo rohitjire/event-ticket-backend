@@ -6,10 +6,11 @@ import {
   TicketValidationMethod,
   TicketValidationStatus,
 } from "@/domain/domain";
-import { AlertCircle, Check, X } from "lucide-react";
+import { AlertCircle, Check, RotateCcw, ScanLine, X } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { validateTicket } from "@/lib/api";
 import { useAuth } from "react-oidc-context";
+import NavBar from "@/components/nav-bar";
 
 const DashboardValidateQrPage: React.FC = () => {
   const { isLoading, user } = useAuth();
@@ -53,88 +54,103 @@ const DashboardValidateQrPage: React.FC = () => {
   };
 
   if (isLoading || !user?.access_token) {
-    <p>Loading...</p>;
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex justify-center items-center">
-      <div
-        className="border border-gray-400 max-w-sm
-w-full p-4"
-      >
-        {error && (
-          <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gray-950 text-white">
+      <NavBar />
+
+      <div className="container mx-auto px-4 py-8 max-w-sm">
+        <div className="text-center mb-6">
+          <ScanLine className="h-8 w-8 text-purple-400 mx-auto mb-2" />
+          <h1 className="text-2xl font-bold">Ticket Validation</h1>
+          <p className="text-gray-400 text-sm mt-1">
+            Scan a QR code or enter a ticket ID
+          </p>
+        </div>
+
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-5">
+          {error && (
             <Alert variant="destructive" className="bg-gray-900 border-red-700">
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Error</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
-          </div>
-        )}
-        {/* Scanner Viewport */}
-        <div className="rounded-lg overflow-hidden mx-auto mb-8 relative">
-          <Scanner
-            key={`scanner-${data}-${validationStatus}`}
-            onScan={(result) => {
-              if (result) {
-                const qrCodeId = result[0].rawValue;
-                setData(qrCodeId);
-                handleValidate(qrCodeId, TicketValidationMethod.QR_SCAN);
-              }
-            }}
-            onError={handleError}
-          />
+          )}
 
-          {validationStatus && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              {validationStatus === TicketValidationStatus.VALID ? (
-                <div className="bg-green-500 rounded-full p-4">
-                  <Check className="w-20 h-20" />
-                </div>
-              ) : (
-                <div className="bg-red-500 rounded-full p-4">
-                  <X className="w-20 h-20" />
-                </div>
-              )}
+          {/* Scanner Viewport */}
+          <div className="rounded-lg overflow-hidden relative">
+            <Scanner
+              key={`scanner-${data}-${validationStatus}`}
+              onScan={(result) => {
+                if (result) {
+                  const qrCodeId = result[0].rawValue;
+                  setData(qrCodeId);
+                  handleValidate(qrCodeId, TicketValidationMethod.QR_SCAN);
+                }
+              }}
+              onError={handleError}
+            />
+
+            {validationStatus && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                {validationStatus === TicketValidationStatus.VALID ? (
+                  <div className="bg-green-500 rounded-full p-4 shadow-lg shadow-green-500/30">
+                    <Check className="w-16 h-16" />
+                  </div>
+                ) : (
+                  <div className="bg-red-500 rounded-full p-4 shadow-lg shadow-red-500/30">
+                    <X className="w-16 h-16" />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {isManual ? (
+            <div className="space-y-3">
+              <Input
+                className="bg-gray-800 border-gray-700 text-white"
+                placeholder="Enter ticket ID..."
+                onChange={(e) => setData(e.target.value)}
+              />
+              <Button
+                className="w-full bg-purple-600 hover:bg-purple-700 h-12 cursor-pointer"
+                onClick={() =>
+                  handleValidate(data || "", TicketValidationMethod.MANUAL)
+                }
+              >
+                Validate
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="bg-gray-800 border border-gray-700 h-10 rounded-lg font-mono text-sm flex justify-center items-center text-gray-400">
+                {data || "Waiting for scan..."}
+              </div>
+              <Button
+                className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 h-12 cursor-pointer"
+                onClick={() => setIsManual(true)}
+              >
+                Enter Manually
+              </Button>
             </div>
           )}
+
+          <Button
+            variant="ghost"
+            className="w-full text-gray-400 hover:text-white cursor-pointer"
+            onClick={handleReset}
+          >
+            <RotateCcw className="h-4 w-4" />
+            Reset
+          </Button>
         </div>
-
-        {isManual ? (
-          <div className="pb-8">
-            <Input
-              className="w-full text-white text-lg mb-8"
-              onChange={(e) => setData(e.target.value)}
-            />
-            <Button
-              className="bg-purple-500 w-full h-[80px] hover:bg-purple-800"
-              onClick={() =>
-                handleValidate(data || "", TicketValidationMethod.MANUAL)
-              }
-            >
-              Submit
-            </Button>
-          </div>
-        ) : (
-          <div>
-            <div className="border-white border-2 h-12 rounded-md font-mono flex justify-center items-center">
-              <span>{data || "Scan for Result"}</span>
-            </div>
-            <Button
-              className="bg-gray-900 hover:bg-gray-600 border-gray-500 border-2 w-full h-[80px] text-xl my-8"
-              onClick={() => setIsManual(true)}
-            >
-              Manual
-            </Button>
-          </div>
-        )}
-
-        <Button
-          className="bg-gray-500 hover:bg-gray-800 w-full h-[80px] text-xl my-8"
-          onClick={handleReset}
-        >
-          Reset
-        </Button>
       </div>
     </div>
   );

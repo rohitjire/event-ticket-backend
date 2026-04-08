@@ -19,7 +19,7 @@ const PurchaseTicketPage: React.FC = () => {
       return;
     }
     const timer = setTimeout(() => {
-      navigate("/");
+      navigate("/dashboard/tickets");
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -45,19 +45,17 @@ const PurchaseTicketPage: React.FC = () => {
 
   if (isPurchaseSuccess) {
     return (
-      <div className="bg-black min-h-screen text-white flex items-center">
-        <div className="max-w-md mx-auto p-8 text-center">
-          <div className="bg-white p-8 rounded-lg border border-gray-200 shadow-sm text-black">
-            <div className="space-y-2">
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
-              <h2 className="text-2xl font-bold text-green-600">Thank you!</h2>
-              <p className="text-gray-600">
-                Your ticket purchase was successful.
-              </p>
-              <p className="text-gray-600 text-sm">
-                Redirecting to home page in a few seconds...
-              </p>
-            </div>
+      <div className="bg-gray-950 min-h-screen text-white flex items-center justify-center">
+        <div className="max-w-md w-full mx-4">
+          <div className="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 rounded-2xl p-8 text-center shadow-2xl">
+            <CheckCircle className="h-16 w-16 text-green-400 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-2">Thank you!</h2>
+            <p className="text-purple-200">
+              Your ticket purchase was successful.
+            </p>
+            <p className="text-purple-300 text-sm mt-2">
+              Redirecting to your tickets...
+            </p>
           </div>
         </div>
       </div>
@@ -65,12 +63,17 @@ const PurchaseTicketPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-black min-h-screen text-white">
-      <div className="max-w-md mx-auto py-20">
-        <div className="bg-white border-gray-300 shadow-sm border rounded-lg space-y-4 p-6">
+    <div className="bg-gray-950 min-h-screen text-white flex items-center justify-center">
+      <div className="max-w-md w-full mx-4">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-5">
+          <div className="text-center mb-2">
+            <CreditCard className="h-8 w-8 text-purple-400 mx-auto mb-2" />
+            <h2 className="text-xl font-bold">Complete Purchase</h2>
+          </div>
+
           {error && (
-            <div className="border border-red-200 rounded-lg p-4 bg-red-50">
-              <div className="text-red-500 text-sm">
+            <div className="border border-red-800 rounded-lg p-4 bg-red-900/20">
+              <div className="text-red-400 text-sm">
                 <strong>Error:</strong> {error}
               </div>
             </div>
@@ -78,42 +81,37 @@ const PurchaseTicketPage: React.FC = () => {
 
           {/* Credit Card Number */}
           <div className="space-y-2">
-            <Label className="text-gray-600">Credit Card Number</Label>
+            <Label className="text-gray-400">Credit Card Number</Label>
             <div className="relative">
               <Input
                 type="text"
                 placeholder="1234 5678 9012 3456"
                 maxLength={19}
-                className="bg-gray-200 text-black pl-10"
+                className="bg-gray-800 border-gray-700 text-white pl-10"
               />
-              <CreditCard className="absolute h-4 w-4 text-gray-400 top-2.5 left-3" />
+              <CreditCard className="absolute h-4 w-4 text-gray-500 top-2.5 left-3" />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label className="text-gray-600">Cardholder Name </Label>
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="John Smith"
-                className="bg-gray-200 text-black pl-10"
-              />
-              <CreditCard className="absolute h-4 w-4 text-gray-400 top-2.5 left-3" />
-            </div>
+            <Label className="text-gray-400">Cardholder Name</Label>
+            <Input
+              type="text"
+              placeholder="John Smith"
+              className="bg-gray-800 border-gray-700 text-white"
+            />
           </div>
 
-          <div className="flex justify-center">
-            <Button
-              className="bg-purple-500 hover:bg-purple-800 cursor-pointer"
-              onClick={handlePurchase}
-            >
-              Purchase Ticket
-            </Button>
-          </div>
+          <Button
+            className="w-full bg-purple-600 hover:bg-purple-700 cursor-pointer h-11"
+            onClick={handlePurchase}
+          >
+            Purchase Ticket
+          </Button>
 
-          <div className="text-gray-500 text-xs flex items-center justify-center">
-            This is a mock page, no payment details should be entered.
-          </div>
+          <p className="text-gray-500 text-xs text-center">
+            This is a demo -- no real payment is processed.
+          </p>
         </div>
       </div>
     </div>

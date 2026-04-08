@@ -7,19 +7,21 @@ const CallbackPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoading) {
-      return;
-    }
-    if (isAuthenticated) {
-      const redirectPath = localStorage.getItem("redirectPath") || "/";
-      localStorage.removeItem("redirectPath");
-      navigate(redirectPath);
-    } else {
-      navigate("/");
+    if (!isLoading) {
+      // onSigninCallback already replaced the URL to the target path,
+      // but if we're still rendering this component, navigate as fallback
+      navigate("/", { replace: true });
     }
   }, [isLoading, isAuthenticated, navigate]);
 
-  return <p>Processing login...</p>;
+  return (
+    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-purple-500 border-t-transparent mx-auto mb-4"></div>
+        <p className="text-gray-400">Processing login...</p>
+      </div>
+    </div>
+  );
 };
 
 export default CallbackPage;

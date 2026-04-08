@@ -116,8 +116,9 @@ const oidcConfig = {
   scope: "openid profile email",
   userStore: new WebStorageStateStore({ store: window.localStorage }),
   onSigninCallback: () => {
-    // Remove auth params from URL after successful token exchange
-    window.history.replaceState({}, document.title, window.location.pathname);
+    const redirectPath = localStorage.getItem("redirectPath") || "/";
+    localStorage.removeItem("redirectPath");
+    window.history.replaceState({}, document.title, redirectPath);
   },
 };
 

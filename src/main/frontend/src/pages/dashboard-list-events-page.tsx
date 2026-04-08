@@ -13,12 +13,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import {
   EventSummary,
   EventStatusEnum,
   SpringBootPagination,
@@ -30,6 +24,7 @@ import {
   Clock,
   Edit,
   MapPin,
+  Plus,
   Tag,
   Trash,
 } from "lucide-react";
@@ -75,9 +70,7 @@ const DashboardListEventsPage: React.FC = () => {
   };
 
   const formatDate = (date?: Date) => {
-    if (!date) {
-      return "TBD";
-    }
+    if (!date) return "TBD";
     return new Date(date).toLocaleDateString("en-US", {
       day: "numeric",
       month: "short",
@@ -86,38 +79,49 @@ const DashboardListEventsPage: React.FC = () => {
   };
 
   const formatTime = (date?: Date) => {
-    if (!date) {
-      return "";
-    }
+    if (!date) return "";
     return new Date(date).toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
     });
   };
 
-  const formatStatusBadge = (status: EventStatusEnum) => {
+  const getStatusStyle = (status: EventStatusEnum) => {
     switch (status) {
-      case EventStatusEnum.DRAFT:
-        return "bg-gray-700 text-gray-200";
       case EventStatusEnum.PUBLISHED:
-        return "bg-green-700 text-green-100";
+        return "bg-green-500/10 text-green-400 border-green-500/30";
+      case EventStatusEnum.DRAFT:
+        return "bg-gray-500/10 text-gray-400 border-gray-500/30";
       case EventStatusEnum.CANCELLED:
-        return "bg-red-700 text-red-100";
+        return "bg-red-500/10 text-red-400 border-red-500/30";
       case EventStatusEnum.COMPLETED:
-        return "bg-blue-700 text-blue-100";
+        return "bg-blue-500/10 text-blue-400 border-blue-500/30";
       default:
-        return "bg-gray-700 text-gray-200";
+        return "bg-gray-500/10 text-gray-400 border-gray-500/30";
+    }
+  };
+
+  const getStatusBorder = (status: EventStatusEnum) => {
+    switch (status) {
+      case EventStatusEnum.PUBLISHED:
+        return "border-l-green-500";
+      case EventStatusEnum.DRAFT:
+        return "border-l-gray-500";
+      case EventStatusEnum.CANCELLED:
+        return "border-l-red-500";
+      case EventStatusEnum.COMPLETED:
+        return "border-l-blue-500";
+      default:
+        return "border-l-gray-500";
     }
   };
 
   const handleOpenDeleteEventDialog = (eventToDelete: EventSummary) => {
-    setEventToDelete(undefined);
     setEventToDelete(eventToDelete);
     setDialogOpen(true);
   };
 
   const handleCancelDeleteEventDialog = () => {
-    setEventToDelete(undefined);
     setEventToDelete(undefined);
     setDialogOpen(false);
   };
@@ -146,131 +150,140 @@ const DashboardListEventsPage: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-black text-white">
-        <Alert variant="destructive" className="bg-gray-900 border-red-700">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+      <div className="min-h-screen bg-gray-950 text-white">
+        <NavBar />
+        <div className="container mx-auto px-4 py-8">
+          <Alert variant="destructive" className="bg-gray-900 border-red-700">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="bg-gray-950 min-h-screen text-white">
       <NavBar />
 
-      <div className="max-w-lg mx-auto px-4">
+      <div className="container mx-auto px-4 max-w-2xl">
         {/* Title */}
-        <div className="py-8 px-4 flex justify-between">
+        <div className="py-8 flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold">Your Events</h1>
-            <p>Events you have created</p>
+            <p className="text-gray-400 text-sm mt-1">
+              Events you have created
+            </p>
           </div>
-          <div>
-            <Link to="/dashboard/events/create">
-              <Button className="bg-purple-700 hover:bg-purple-500 cursor-pointer">
-                Create Event
-              </Button>
-            </Link>
-          </div>
+          <Link to="/dashboard/events/create">
+            <Button className="bg-purple-600 hover:bg-purple-700 cursor-pointer">
+              <Plus className="h-4 w-4" />
+              Create Event
+            </Button>
+          </Link>
         </div>
 
         {/* Event Cards */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           {events?.content.map((eventItem) => (
-            <Card className="bg-gray-900 border-gray-700 text-white">
-              <CardHeader>
-                <div className="flex justify-between">
-                  <h3 className="font-bold text-xl">{eventItem.name}</h3>
+            <div
+              key={eventItem.id}
+              className={`bg-gray-900 border border-gray-800 rounded-xl overflow-hidden border-l-4 ${getStatusBorder(eventItem.status)} hover:border-gray-700 transition-colors`}
+            >
+              <div className="p-5">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="font-bold text-lg">{eventItem.name}</h3>
                   <span
-                    className={`flex items-center px-2 py-1 rounded-lg text-xs ${formatStatusBadge(eventItem.status)}`}
+                    className={`px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusStyle(eventItem.status)}`}
                   >
                     {eventItem.status}
                   </span>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Event Start & End */}
-                <div className="flex space-x-2">
-                  <Calendar className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="font-medium">
+
+                <div className="space-y-2.5 text-sm">
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <Calendar className="h-4 w-4 shrink-0" />
+                    <span>
                       {formatDate(eventItem.start)} to{" "}
                       {formatDate(eventItem.end)}
-                    </p>
-                    <p className="text-gray-400">
-                      {formatTime(eventItem.start)} -{" "}
-                      {formatTime(eventItem.end)}
-                    </p>
+                      {eventItem.start && (
+                        <span className="text-gray-500 ml-1">
+                          {formatTime(eventItem.start)} -{" "}
+                          {formatTime(eventItem.end)}
+                        </span>
+                      )}
+                    </span>
                   </div>
-                </div>
-                {/* Sales start and end */}
-                <div className="flex space-x-2">
-                  <Clock className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <h4 className="font-medium">Sales Period</h4>
-                    <p className="text-gray-400">
-                      {formatDate(eventItem.salesStart)} to{" "}
+
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <Clock className="h-4 w-4 shrink-0" />
+                    <span>
+                      Sales: {formatDate(eventItem.salesStart)} to{" "}
                       {formatDate(eventItem.salesEnd)}
-                    </p>
+                    </span>
                   </div>
-                </div>
-                <div className="flex space-x-2">
-                  <MapPin className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <p className="font-medium">{eventItem.venue}</p>
+
+                  <div className="flex items-center gap-2 text-gray-400">
+                    <MapPin className="h-4 w-4 shrink-0" />
+                    <span>{eventItem.venue}</span>
                   </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Tag className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <h4 className="font-medium">Ticket Types</h4>
-                    <ul>
+
+                  <div className="flex items-start gap-2 text-gray-400">
+                    <Tag className="h-4 w-4 shrink-0 mt-0.5" />
+                    <div className="flex flex-wrap gap-2">
                       {eventItem.ticketTypes.map((ticketType) => (
-                        <li
+                        <span
                           key={ticketType.id}
-                          className="flex gap-2 text-gray-400"
+                          className="bg-gray-800 px-2 py-0.5 rounded text-xs"
                         >
-                          <span>{ticketType.name}</span>
-                          <span>${ticketType.price}</span>
-                        </li>
+                          {ticketType.name} - ${ticketType.price}
+                        </span>
                       ))}
-                    </ul>
+                    </div>
                   </div>
                 </div>
-              </CardContent>
-              <CardFooter className="flex justify-end gap-2">
-                <Link to={`/dashboard/events/update/${eventItem.id}`}>
+
+                <div className="flex justify-end gap-2 mt-4 pt-4 border-t border-gray-800">
+                  <Link to={`/dashboard/events/update/${eventItem.id}`}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-gray-400 hover:text-white cursor-pointer"
+                    >
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </Button>
+                  </Link>
                   <Button
                     type="button"
-                    className="bg-gray-700 hover:bg-gray-500 cursor-pointer"
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-400 hover:text-red-300 hover:bg-red-900/20 cursor-pointer"
+                    onClick={() => handleOpenDeleteEventDialog(eventItem)}
                   >
-                    <Edit />
+                    <Trash className="h-4 w-4" />
+                    Delete
                   </Button>
-                </Link>
-                <Button
-                  type="button"
-                  className="bg-red-700/80 hover:bg-red-500 cursor-pointer"
-                  onClick={() => handleOpenDeleteEventDialog(eventItem)}
-                >
-                  <Trash />
-                </Button>
-              </CardFooter>
-            </Card>
+                </div>
+              </div>
+            </div>
           ))}
         </div>
+
+        <div className="flex justify-center py-8">
+          {events && (
+            <SimplePagination pagination={events} onPageChange={setPage} />
+          )}
+        </div>
       </div>
-      <div className="flex justify-center py-8">
-        {events && (
-          <SimplePagination pagination={events} onPageChange={setPage} />
-        )}
-      </div>
+
       <AlertDialog open={dialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-gray-900 border-gray-700 text-white">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-gray-400">
               This will delete your event '{eventToDelete?.name}' and cannot be
               undone.
             </AlertDialogDescription>
@@ -283,11 +296,17 @@ const DashboardListEventsPage: React.FC = () => {
             </Alert>
           )}
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancelDeleteEventDialog}>
+            <AlertDialogCancel
+              onClick={handleCancelDeleteEventDialog}
+              className="bg-gray-800 border-gray-700 text-white hover:bg-gray-700"
+            >
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction onClick={() => handleDeleteEvent()}>
-              Continue
+            <AlertDialogAction
+              onClick={() => handleDeleteEvent()}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
